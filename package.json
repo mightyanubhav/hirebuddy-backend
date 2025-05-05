@@ -1,0 +1,29 @@
+{
+  "name": "hirebuddy-backend",
+  "version": "1.0.0",
+  "description": "backend for my hirebuddy app",
+  "keywords": [
+    "backend",
+    "hirebuddy"
+  ],
+  "homepage": "https://github.com/mightyanubhav/hirebuddy-backend#readme",
+  "bugs": {
+    "url": "https://github.com/mightyanubhav/hirebuddy-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mightyanubhav/hirebuddy-backend.git"
+  },
+  "license": "ISC",
+  "author": "Anubhav Shukla",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
