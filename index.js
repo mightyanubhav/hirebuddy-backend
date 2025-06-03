@@ -7,8 +7,10 @@ const connectDB = require('./db/db')
 
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes') 
-app.use(bodyParser.json())
+const cookieParser = require("cookie-parser");
 
+app.use(bodyParser.json())
+app.use(cookieParser());
 
 app.use('/user', userRoutes)
   
