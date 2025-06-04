@@ -14,7 +14,7 @@ const buddyOnly = (req, res, next) => {
 };
 
 // 1. Update Buddy Profile
-router.put("/profile", authMiddleware, buddyOnly, async (req, res) => {
+router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
   const { baseRate, expertise, location, languages, bio, availableDates } = req.body;
 
   try {
