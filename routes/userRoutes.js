@@ -160,15 +160,15 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/profile", authMiddleware, async (req, res) => {
-  // req.user is available from decoded token
-  try {
-    const user = await User.findById(req.user.id).select("-password");
-    res.json({ user });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch user profile" });
-  }
-});
+// router.get("/profile", authMiddleware, async (req, res) => {
+//   // req.user is available from decoded token
+//   try {
+//     const user = await User.findById(req.user.id).select("-password");
+//     res.json({ user });
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch user profile" });
+//   }
+// });
 
 router.post('/logout', (req, res) => {
   res.clearCookie('token', {
