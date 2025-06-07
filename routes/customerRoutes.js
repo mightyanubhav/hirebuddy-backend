@@ -6,7 +6,7 @@ const Booking = require("../models/booking.model");
 const router = express.Router();
 
 
-const {customerOnly , buddyOnly} = require('../middlewares/roles');
+const {customerOnly } = require('../middlewares/roles');
 
 // 1. View All Buddies (Filtered List)
 router.get("/buddies", authMiddleware, customerOnly, async (req, res) => {
@@ -68,7 +68,7 @@ router.post("/book", authMiddleware, customerOnly, async (req, res) => {
   }
 });
 
-// 4. Get Customer Bookings (Dummy for now)
+// 4. Get Customer Bookings 
 
 router.get("/bookings", authMiddleware, customerOnly, async (req, res) => {
   try {
@@ -93,31 +93,6 @@ router.get("/messages", authMiddleware, customerOnly, async (req, res) => {
   });
 });
 
-
-// 6. Update Booking Status (Accept/Decline)
-router.put("/booking/:id/status", authMiddleware, buddyOnly, async (req, res) => {
-  const { status } = req.body;
-
-  if (!["Confirmed", "Declined"].includes(status)) {
-    return res.status(400).json({ error: "Invalid status" });
-  }
-
-  try {
-    const booking = await Booking.findOneAndUpdate(
-      { _id: req.params.id, buddy: req.user.id },
-      { status },
-      { new: true }
-    );
-
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-
-    res.json({ message: "Booking status updated", booking });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update booking status" });
-  }
-});
 
 
 module.exports = router;

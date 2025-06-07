@@ -6,13 +6,6 @@ const { buddyOnly } = require('../middlewares/roles')
 const router = express.Router();
 const Booking = require("../models/booking.model");
 
-// Only buddies can access these routes
-// const buddyOnly = (req, res, next) => {
-//   if (req.user.role !== "buddy") {
-//     return res.status(403).json({ error: "Access denied. Buddy only." });
-//   }
-//   next();
-// };
 
 // 1. Update Buddy Profile
 router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
@@ -43,7 +36,6 @@ router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
 });
 
 
-
 router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
   const { status } = req.query; // Optional query ?status=Pending
 
@@ -64,7 +56,7 @@ router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
   }
 });
 
-// 2. Get Buddy Bookings (Dummy Data for Now)
+// 2. Get Buddy Bookings 
 router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
   try {
     const bookings = await Booking.find({ buddy: req.user.id })
