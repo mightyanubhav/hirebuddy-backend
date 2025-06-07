@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const redisClient = require("../db/redis");
 const jwt = require("jsonwebtoken");
-const authMiddleware = require("../middlewares/auth");
 
 require("dotenv").config();
 
@@ -28,11 +27,11 @@ router.post("/signup", async (req, res) => {
   try {
     // Check if user already exists
     const existingUser = await User.findOne({ phone });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "User already exists with this phone" });
-    }
+    // if (existingUser) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "User already exists with this phone" });
+    // }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -120,7 +119,7 @@ router.post("/verify-otp", async (req, res) => {
 // LOGIN
 // =======================
 router.post("/login", async (req, res) => {
-  const { phone, password } = req.body;
+  const { phone, password, name } = req.body;
 
   if (!phone || !password) {
     return res.status(400).json({ error: "Phone and password are required" });
@@ -128,7 +127,9 @@ router.post("/login", async (req, res) => {
 
   try {
     // Find user by phone
-    const user = await User.findOne({ phone });
+    // const user = await User.findOne({ phone });
+    // find user by name temporary 
+    const user = await User.findOne({ name });
     if (!user) {
       return res.status(400).json({ error: "Invalid phone or password" });
     }
@@ -160,15 +161,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// router.get("/profile", authMiddleware, async (req, res) => {
-//   // req.user is available from decoded token
-//   try {
-//     const user = await User.findById(req.user.id).select("-password");
-//     res.json({ user });
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch user profile" });
-//   }
-// });
 
 router.post('/logout', (req, res) => {
   res.clearCookie('token', {

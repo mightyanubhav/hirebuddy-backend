@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: /^\+[1-9]\d{1,14}$/, // E.164 format
-    unique: true,
+    // unique: true,
   },
 
   role: {
