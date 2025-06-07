@@ -42,7 +42,7 @@ router.get("/buddy/:id", authMiddleware, customerOnly, async (req, res) => {
   }
 });
 
-// 3. Dummy Booking Request (To Be Replaced with Booking Model Later)
+// 3.  Booking Request 
 router.post("/book", authMiddleware, customerOnly, async (req, res) => {
   const { buddyId, date, location } = req.body;
 
