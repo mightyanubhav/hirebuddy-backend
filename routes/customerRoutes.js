@@ -5,13 +5,6 @@ const Booking = require("../models/booking.model");
 
 const router = express.Router();
 
-// Only customers can access these routes
-// const customerOnly = (req, res, next) => {
-//   if (req.user.role !== "customer") {
-//     return res.status(403).json({ error: "Access denied. Customer only." });
-//   }
-//   next();
-// };
 
 const {customerOnly , buddyOnly} = require('../middlewares/roles');
 

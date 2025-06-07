@@ -2,16 +2,17 @@
 const express = require("express");
 const User = require("../models/user.model");
 const authMiddleware = require("../middlewares/auth");
-
+const { buddyOnly } = require('../middlewares/roles')
 const router = express.Router();
+const Booking = require("../models/booking.model");
 
 // Only buddies can access these routes
-const buddyOnly = (req, res, next) => {
-  if (req.user.role !== "buddy") {
-    return res.status(403).json({ error: "Access denied. Buddy only." });
-  }
-  next();
-};
+// const buddyOnly = (req, res, next) => {
+//   if (req.user.role !== "buddy") {
+//     return res.status(403).json({ error: "Access denied. Buddy only." });
+//   }
+//   next();
+// };
 
 // 1. Update Buddy Profile
 router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
@@ -42,19 +43,39 @@ router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
 });
 
 
+
+router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
+  const { status } = req.query; // Optional query ?status=Pending
+
+  try {
+    const filter = { buddy: req.user.id };
+    if (status) {
+      filter.status = status; // e.g., 'Pending', 'Confirmed', 'Declined'
+    }
+
+    const bookings = await Booking.find(filter)
+      .populate("customer", "name email phone")
+      .sort({ createdAt: -1 });
+
+    res.json({ bookings });
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
+});
+
 // 2. Get Buddy Bookings (Dummy Data for Now)
 router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
-  // TODO: Replace with real booking model later
-  res.json({
-    bookings: [
-      {
-        customerName: "John Doe",
-        date: "2025-06-10",
-        location: "Delhi",
-        status: "Confirmed"
-      }
-    ]
-  });
+  try {
+    const bookings = await Booking.find({ buddy: req.user.id })
+      .populate("customer", "name email phone")
+      .sort({ createdAt: -1 });
+
+    res.json({ bookings });
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
 });
 
 // 3. Get Buddy Earnings (Dummy)
@@ -97,5 +118,33 @@ router.put("/availability", authMiddleware, buddyOnly, async (req, res) => {
     res.status(500).json({ error: "Could not update availability" });
   }
 });
+
+
+// Accept or Decline Booking
+router.put("/booking/:id/status", authMiddleware, buddyOnly, async (req, res) => {
+  const { status } = req.body;
+ 
+  if (!["Confirmed", "Declined"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status. Must be 'Confirmed' or 'Declined'." });
+  }
+
+  try {
+    const booking = await Booking.findOneAndUpdate(
+      { _id: req.params.id, buddy: req.user.id }, // Ensure the booking belongs to this buddy
+      { status },
+      { new: true }
+    ).populate("customer", "name email");
+
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found or access denied." });
+    }
+
+    res.json({ message: `Booking ${status.toLowerCase()}`, booking });
+  } catch (err) {
+    console.error("Error updating booking status:", err);
+    res.status(500).json({ error: "Could not update booking status" });
+  }
+});
+
 
 module.exports = router;
