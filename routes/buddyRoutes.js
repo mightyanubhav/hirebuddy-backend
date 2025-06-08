@@ -5,6 +5,8 @@ const authMiddleware = require("../middlewares/auth");
 const { buddyOnly } = require('../middlewares/roles')
 const router = express.Router();
 const Booking = require("../models/booking.model");
+const Message = require("../models/message.model");
+
 
 
 // 1. Update Buddy Profile
@@ -84,15 +86,20 @@ router.get("/earnings", authMiddleware, buddyOnly, async (req, res) => {
   });
 });
 
-// 4. Get Messages (Dummy)
-router.get("/messages", authMiddleware, buddyOnly, async (req, res) => {
-  // TODO: Connect with message/chat system later
-  res.json({
-    messages: [
-      { from: "Customer A", text: "Are you available on June 15?", date: "2025-06-01" },
-      { from: "Customer B", text: "Can you guide me in Jaipur?", date: "2025-06-02" }
-    ]
-  });
+// 4.  GET /messages?bookingId=123
+router.get("/messages", authMiddleware, async (req, res) => {
+  const { bookingId } = req.query;
+  if (!bookingId) return res.status(400).json({ error: "bookingId is required" });
+
+  try {
+    const messages = await Message.find({ booking: bookingId })
+      .sort({ createdAt: 1 });
+
+    res.json({ messages });
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+    res.status(500).json({ error: "Could not fetch messages" });
+  }
 });
 
 // 5. Update Availability

@@ -5,6 +5,7 @@ const Booking = require("../models/booking.model");
 
 const router = express.Router();
 
+const Message = require("../models/message.model");
 
 const {customerOnly } = require('../middlewares/roles');
 
@@ -83,16 +84,21 @@ router.get("/bookings", authMiddleware, customerOnly, async (req, res) => {
 });
 
 
-// 5. Get Messages (Dummy)
-router.get("/messages", authMiddleware, customerOnly, async (req, res) => {
-  res.json({
-    messages: [
-      { from: "Buddy A", text: "I'm available on June 12!", date: "2025-06-01" },
-      { from: "Buddy B", text: "Looking forward to meeting you!", date: "2025-06-02" },
-    ],
-  });
-});
+// GET /messages?bookingId=123
+router.get("/messages", authMiddleware, async (req, res) => {
+  const { bookingId } = req.query;
+  if (!bookingId) return res.status(400).json({ error: "bookingId is required" });
 
+  try {
+    const messages = await Message.find({ booking: bookingId })
+      .sort({ createdAt: 1 });
+
+    res.json({ messages });
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+    res.status(500).json({ error: "Could not fetch messages" });
+  }
+});
 
 
 module.exports = router;
