@@ -1,32 +1,58 @@
-const { io } = require("socket.io-client");
-const readline = require('readline');
+const io = require("socket.io-client");
+const readline = require("readline");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-const socket = io("http://localhost:7777");
+const Booking = require("../models/booking.model");
 
-const senderId = "684436b2c02685a174b057f6"; // buddyId
-const receiverId = "68443497f1b7051914a7a801"; // customerId
-const roomId = "684441e38be4fc8c36f5c3d0"; /// booking id
+(async () => {
+  // Connect to MongoDB
+  await mongoose.connect(process.env.MONGO_URL);
+  console.log("✅ Connected to MongoDB");
 
-socket.on("connect", () => {
-  console.log("✅ Buddy connected");
-  socket.emit("joinRoom", roomId);
-});
+  // Fetch the booking info by booking ID
+  const bookingId = process.argv[2]; // pass booking ID from CLI
+  const booking = await Booking.findById(bookingId);
 
-socket.on("message", (data) => {
-  console.log(`📩 Message from ${data.senderId}: ${data.text}`);
-});
+  if (!booking) {
+    console.error("❌ No booking found with the provided ID.");
+    process.exit(1);
+  }
 
-// Listen for terminal input
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+  // Extract buddy, customer, and room ID (booking ID)
+  const buddyId = booking.buddy.toString();
+  const customerId = booking.customer.toString();
+  const roomId = booking._id.toString();
 
-rl.on('line', (input) => {
-  socket.emit("chatMessage", {
-    roomId,
-    senderId,
-    receiverId,
-    text: input
+  console.log(`✅ Booking found:
+  - Room ID: ${roomId}
+  - Buddy ID: ${buddyId}
+  - Customer ID: ${customerId}`);
+
+  // Connect to Socket.io server
+  const socket = io(`http://localhost:${process.env.PORT}`);
+
+  socket.on("connect", () => {
+    console.log("✅ Buddy connected to chat server");
+    socket.emit("joinRoom", roomId);
   });
-});
+
+  socket.on("message", (data) => {
+    console.log(`💬 Message from ${data.senderId}: ${data.text}`);
+  });
+
+  // CLI input to send messages
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  rl.on("line", (input) => {
+    socket.emit("chatMessage", {
+      roomId,
+      senderId: buddyId,
+      receiverId: customerId,
+      text: input,
+    });
+  });
+})();

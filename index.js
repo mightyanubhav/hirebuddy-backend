@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const http = require("http");
 const express = require("express");
-const socketIo = require("socket.io");
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
 
