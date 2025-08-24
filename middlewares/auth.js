@@ -2,16 +2,29 @@
 const jwt = require('jsonwebtoken');
 
 const authenticate = (req, res, next) => {
-  const token = req.cookies?.token;
-  if (!token) return res.status(401).json({ error: 'Please login' });
+  let token;
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use env var in production
+  // Check Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  // Or check cookies (if you’re storing JWT in cookies too)
+  if (!token && req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: "Please login" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
     req.user = decoded;
     next();
-  } catch (err) {
-    return res.status(403).json({ error: 'Invalid token' });
-  }
+  });
 };
-
 module.exports = authenticate;
+

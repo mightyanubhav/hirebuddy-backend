@@ -37,6 +37,26 @@ router.put("/profileEdit", authMiddleware, buddyOnly, async (req, res) => {
   }
 });
 
+// Get Buddy Profile (current logged-in buddy)
+router.get("/profile", authMiddleware, buddyOnly, async (req, res) => {
+  try {
+    const buddy = await User.findById(req.user.id).select("-password");
+
+    if (!buddy) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!buddy.buddyProfile || Object.keys(buddy.buddyProfile).length === 0) {
+      return res.status(404).json({ error: "Profile not created yet" });
+    }
+
+    res.json({ buddyProfile: buddy.buddyProfile });
+  } catch (err) {
+    console.error("Fetch profile error:", err);
+    res.status(500).json({ error: "Could not fetch profile" });
+  }
+});
+
 
 router.get("/bookings", authMiddleware, buddyOnly, async (req, res) => {
   const { status } = req.query; // Optional query ?status=Pending
@@ -99,6 +119,58 @@ router.get("/messages", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Error fetching messages:", err);
     res.status(500).json({ error: "Could not fetch messages" });
+  }
+});
+
+router.post('/messages', authMiddleware, async (req, res) => {
+  try {
+    const { bookingId, text } = req.body;
+    const senderId = req.user.id;
+
+    // Validate input
+    if (!bookingId || !text) {
+      return res.status(400).json({ error: 'Booking ID and text are required' });
+    }
+
+    // Find the booking
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    // Check if the user is part of this booking
+    if (booking.customer.toString() !== senderId && booking.buddy.toString() !== senderId) {
+      return res.status(403).json({ error: 'You are not part of this booking' });
+    }
+
+    // Determine receiver
+    const receiverId = booking.customer.toString() === senderId 
+      ? booking.buddy 
+      : booking.customer;
+
+    // Create and save the message
+    const message = new Message({
+      booking: bookingId,
+      sender: senderId,
+      receiver: receiverId,
+      text: text
+    });
+
+    await message.save();
+
+    // Populate sender and receiver details for the response
+    await message.populate('sender', 'name');
+    await message.populate('receiver', 'name');
+    await message.populate('booking');
+
+    res.status(201).json({
+      success: true,
+      message: 'Message sent successfully',
+      data: message
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

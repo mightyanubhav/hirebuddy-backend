@@ -10,13 +10,23 @@ const userRoutes = require('./routes/userRoutes');
 const buddyRoutes = require('./routes/buddyRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 // const adminRoutes = require('./routes/adminRoutes');
+const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
 
+app.use(cors({
+  origin: "http://localhost:5173", // React dev server URL
+  credentials: true
+}));
+
+
+
 // Middleware
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+
 
 // Routes
 app.use('/user', userRoutes);
