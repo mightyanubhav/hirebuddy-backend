@@ -50,7 +50,12 @@ router.get("/profile", authMiddleware, buddyOnly, async (req, res) => {
       return res.status(404).json({ error: "Profile not created yet" });
     }
 
-    res.json({ buddyProfile: buddy.buddyProfile });
+    // Merge user info + profile
+    res.json({
+      name: buddy.name, // 👈 add this
+      email: buddy.email, // optional
+      buddyProfile: buddy.buddyProfile,
+    });
   } catch (err) {
     console.error("Fetch profile error:", err);
     res.status(500).json({ error: "Could not fetch profile" });
