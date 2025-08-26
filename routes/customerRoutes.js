@@ -206,4 +206,19 @@ router.post("/messages", authMiddleware, async (req, res) => {
   }
 });
 
+// Get logged-in user's credits
+router.get("/credits", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("credits");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ credits: user.credits });
+  } catch (err) {
+    console.error("Error fetching credits:", err);
+    res.status(500).json({ error: "Failed to fetch credits" });
+  }
+});
+
+
 module.exports = router;

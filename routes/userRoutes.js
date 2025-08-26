@@ -103,7 +103,7 @@ router.post("/verify-otp", async (req, res) => {
     */
 
     // ✅ Dev mode check
-    if (otp !== "123456") {
+    if (otp !== "12345") {
       return res.status(400).json({ error: "Invalid OTP. Use 12345 in dev." });
     }
 
