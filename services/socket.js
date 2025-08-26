@@ -21,7 +21,13 @@ function setupSocket(server) {
       const { roomId, senderId, receiverId, text } = data;
       console.log(`💬 Message from ${senderId} to room ${roomId}: ${text}`);
 
-      io.to(roomId).emit("message", { senderId, text });
+      // Broadcast to everyone in the room
+      io.to(roomId).emit("message", {
+        senderId,
+        receiverId,
+        text,
+        createdAt: new Date(),
+      });
     });
 
     socket.on("disconnect", () => {

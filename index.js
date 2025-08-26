@@ -9,6 +9,7 @@ const connectDB = require('./db/db');
 const userRoutes = require('./routes/userRoutes'); 
 const buddyRoutes = require('./routes/buddyRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const paymentRoutes = require('./routes/payment')
 // const adminRoutes = require('./routes/adminRoutes');
 const cors = require("cors");
 
@@ -32,6 +33,7 @@ app.use(cookieParser());
 app.use('/user', userRoutes);
 app.use('/buddy', buddyRoutes);
 app.use('/customer', customerRoutes);
+app.use('/payment', paymentRoutes)
 // app.use('/admin', adminRoutes);
 
 // Setup socket server

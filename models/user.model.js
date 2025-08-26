@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
+  credits: {
+    type: Number,
+    default: 3, // give 3 free trial credits initially
+    min: 0,
+  },
   // Optional: Buddy-specific profile fields
   buddyProfile: {
     baseRate: Number,

@@ -40,7 +40,6 @@ router.get("/buddies", authMiddleware, customerOnly, async (req, res) => {
   }
 });
 
-
 // 2. View Specific Buddy Profile by ID
 router.get("/buddy/:id", authMiddleware, customerOnly, async (req, res) => {
   try {
@@ -57,16 +56,31 @@ router.get("/buddy/:id", authMiddleware, customerOnly, async (req, res) => {
   }
 });
 
-// 3.  Booking Request
+// 3. Booking Request
 router.post("/book", authMiddleware, customerOnly, async (req, res) => {
   const { buddyId, date, location } = req.body;
 
   try {
+    // find customer (with credits)
+    const customer = await User.findById(req.user.id);
+    if (!customer) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+
+    // check credits
+    if (customer.credits <= 0) {
+      return res
+        .status(403)
+        .json({ error: "You don't have enough credits. Please buy more." });
+    }
+
+    // find buddy
     const buddy = await User.findById(buddyId);
     if (!buddy || buddy.role !== "buddy") {
       return res.status(404).json({ error: "Buddy not found" });
     }
 
+    // create booking
     const newBooking = new Booking({
       customer: req.user.id,
       buddy: buddyId,
@@ -76,9 +90,15 @@ router.post("/book", authMiddleware, customerOnly, async (req, res) => {
 
     await newBooking.save();
 
-    res
-      .status(201)
-      .json({ message: "Booking request sent", booking: newBooking });
+    // deduct 1 credit from customer
+    customer.credits -= 1;
+    await customer.save();
+
+    res.status(201).json({
+      message: "Booking successful. 1 credit deducted.",
+      booking: newBooking,
+      remainingCredits: customer.credits,
+    });
   } catch (err) {
     console.error("Booking error:", err);
     res.status(500).json({ error: "Booking failed" });
@@ -86,18 +106,36 @@ router.post("/book", authMiddleware, customerOnly, async (req, res) => {
 });
 
 // 4. Get Customer Bookings
-
 router.get("/bookings", authMiddleware, customerOnly, async (req, res) => {
   try {
+    // fetch customer credits
+    const customer = await User.findById(req.user.id).select("credits");
+
     const bookings = await Booking.find({ customer: req.user.id })
       .populate("buddy", "name email phone buddyProfile.location")
       .sort({ createdAt: -1 });
 
-    res.json({ bookings });
+    res.json({
+      bookings,
+      remainingCredits: customer.credits, // include credits in response
+    });
   } catch (err) {
+    console.error("Error fetching bookings:", err);
     res.status(500).json({ error: "Failed to fetch bookings" });
   }
 });
+
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching profile:", err);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
 
 // GET /messages?bookingId=123
 router.get("/messages", authMiddleware, async (req, res) => {
@@ -117,13 +155,14 @@ router.get("/messages", authMiddleware, async (req, res) => {
   }
 });
 
-
 // POST /messages
 router.post("/messages", authMiddleware, async (req, res) => {
   const { bookingId, content } = req.body;
 
   if (!bookingId || !content) {
-    return res.status(400).json({ error: "bookingId and content are required" });
+    return res
+      .status(400)
+      .json({ error: "bookingId and content are required" });
   }
 
   try {
@@ -145,7 +184,9 @@ router.post("/messages", authMiddleware, async (req, res) => {
     } else if (booking.buddy._id.toString() === sender) {
       receiver = booking.customer._id;
     } else {
-      return res.status(403).json({ error: "You are not part of this booking" });
+      return res
+        .status(403)
+        .json({ error: "You are not part of this booking" });
     }
 
     // create message
@@ -164,6 +205,5 @@ router.post("/messages", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Could not send message" });
   }
 });
-
 
 module.exports = router;
