@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: "http://localhost:5173", // React dev server URL
+  origin: process.env.FRONTEND_URL, // React dev server URL
   credentials: true
 }));
 

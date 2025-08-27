@@ -5,7 +5,7 @@ let io;
 function setupSocket(server) {
   io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -14,13 +14,13 @@ function setupSocket(server) {
     console.log("🟢 New socket connected: ", socket.id);
 
     socket.on("joinRoom", (roomId) => {
-      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+      // console.log(`Socket ${socket.id} joined room: ${roomId}`);
       socket.join(roomId);
     });
 
     socket.on("chatMessage", (data) => {
       const { roomId, senderId, receiverId, text } = data;
-      console.log(`💬 Message from ${senderId} to room ${roomId}: ${text}`);
+      // console.log(`💬 Message from ${senderId} to room ${roomId}: ${text}`);
 
       // Broadcast to everyone in the room
       io.to(roomId).emit("message", {
