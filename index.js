@@ -30,6 +30,10 @@ app.use(cookieParser());
 
 
 // Routes
+app.get("/wakeup", (req, res) => {
+  res.status(200).json({ message: "Server is awake 🚀" });
+});
+
 app.use('/user', userRoutes);
 app.use('/buddy', buddyRoutes);
 app.use('/customer', customerRoutes);
