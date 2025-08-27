@@ -4,11 +4,12 @@ let io;
 
 function setupSocket(server) {
   io = new Server(server, {
-    cors: {
-      origin: "*", // Allow frontend or test client connections
-    },
-  });
-
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+});
   io.on("connection", (socket) => {
     console.log("🟢 New socket connected: ", socket.id);
 
