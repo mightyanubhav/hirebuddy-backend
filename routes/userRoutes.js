@@ -1,27 +1,28 @@
 const express = require("express");
 const passport = require("passport");
-
-const twilio = require("twilio");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
-
 const redisClient = require("../db/redis");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 require("dotenv").config();
 
 const router = express.Router();
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// =======================
+// Nodemailer Transporter
+// =======================
+const transporter = nodemailer.createTransport({
+  service: "gmail", 
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, 
+  },
+});
 
 // =======================
-// SIGNUP: collect data & send OTP
-// =======================
-// =======================
-// SIGNUP: collect data & send OTP
+// SIGNUP: collect data & send OTP via Email
 // =======================
 router.post("/signup", async (req, res) => {
   const { phone, name, email, password, role } = req.body;
@@ -31,16 +32,17 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ phone });
+    // Check if user already exists (by email or phone)
+    const existingUser = await User.findOne({email});
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "User already exists with this phone" });
+      return res.status(400).json({ error: "User already exists" });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Save signup data temporarily in Redis (expires in 10 min)
     await redisClient.setEx(
@@ -52,32 +54,26 @@ router.post("/signup", async (req, res) => {
         phone,
         role,
         password: hashedPassword,
+        otp,
       })
     );
 
-    // ======================
-    // Twilio OTP sending (commented out for dev)
-    // ======================
-    /*
-    const verification = await client.verify.v2
-      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
-      .verifications.create({ to: phone, channel: "sms" });
-    */
-
-    // ✅ Dev mode response
-    return res.json({
-      message: "OTP (12345) sent successfully [Dev Mode]",
-      // status: verification.status,
+    // Send OTP via Email
+    await transporter.sendMail({
+      from: `"HireBuddy Auth" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your OTP Code - HireBuddy",
+      text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
+      html: `<p>Your OTP code is <b>${otp}</b>. It will expire in <b>10 minutes</b>.</p>`,
     });
+
+    return res.json({ message: "OTP sent successfully to your email" });
   } catch (error) {
-    console.error(error);
+    console.error("Signup error:", error);
     return res.status(500).json({ error: "Failed to start signup" });
   }
 });
 
-// =======================
-// VERIFY OTP & CREATE USER
-// =======================
 // =======================
 // VERIFY OTP & CREATE USER
 // =======================
@@ -89,24 +85,6 @@ router.post("/verify-otp", async (req, res) => {
   }
 
   try {
-    // ======================
-    // Twilio OTP check (commented out for dev)
-    // ======================
-    /*
-    const verificationCheck = await client.verify.v2
-      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
-      .verificationChecks.create({ to: phone, code: otp });
-
-    if (verificationCheck.status !== "approved") {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
-    }
-    */
-
-    // ✅ Dev mode check
-    if (otp !== "12345") {
-      return res.status(400).json({ error: "Invalid OTP. Use 12345 in dev." });
-    }
-
     // Retrieve signup data from Redis
     const signupDataStr = await redisClient.get(`signup:${phone}`);
     if (!signupDataStr) {
@@ -114,6 +92,11 @@ router.post("/verify-otp", async (req, res) => {
     }
 
     const signupData = JSON.parse(signupDataStr);
+
+    // Check OTP
+    if (signupData.otp !== otp) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
 
     // Create user
     const newUser = new User({
@@ -131,7 +114,7 @@ router.post("/verify-otp", async (req, res) => {
 
     return res.json({ message: "Signup successful", user: newUser });
   } catch (error) {
-    console.error(error);
+    console.error("Verify OTP error:", error);
     return res
       .status(500)
       .json({ error: "OTP verification or user creation failed" });
@@ -139,53 +122,67 @@ router.post("/verify-otp", async (req, res) => {
 });
 
 // =======================
-// LOGIN
+// LOGIN (email OR phone)
 // =======================
 router.post("/login", async (req, res) => {
-  const { phone, password } = req.body;
+  const { identifier, password } = req.body; 
+  // identifier can be email OR phone
 
-  if (!phone || !password) {
-    return res.status(400).json({ error: "Phone and password are required" });
+  if (!identifier || !password) {
+    return res
+      .status(400)
+      .json({ error: "Email/Phone and password are required" });
   }
 
   try {
-    // Find user by phone
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }],
+    });
+
     if (!user) {
-      return res.status(400).json({ error: "Invalid phone or password" });
+      return res.status(400).json({ error: "Invalid email/phone or password" });
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid phone or password" });
+      return res.status(400).json({ error: "Invalid email/phone or password" });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, phone: user.phone, role: user.role },
+      { id: user._id, email: user.email, phone: user.phone, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" } // optional: set token expiry
+      { expiresIn: "1h" }
     );
 
+    // Send as cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // set true in prod
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
     });
 
     res.status(200).json({
       message: "Login successful",
       token,
       role: user.role,
+      user: {
+        id: user._id,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     return res.status(500).json({ error: "Login failed" });
   }
 });
 
+// =======================
+// LOGOUT
+// =======================
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -194,6 +191,8 @@ router.post("/logout", (req, res) => {
   });
   return res.status(200).json({ message: "Logout successful" });
 });
+
+module.exports = router;
 
 // Google OAuth
 router.get(
