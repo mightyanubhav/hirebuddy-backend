@@ -58,7 +58,7 @@ router.post("/signup", async (req, res) => {
       })
     );
 
-    // Send OTP via Email
+    // Send OTP via Emailgit 
     await transporter.sendMail({
       from: `"HireBuddy Auth" <${process.env.EMAIL_USER}>`,
       to: email,
