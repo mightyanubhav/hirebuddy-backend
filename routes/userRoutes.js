@@ -4,25 +4,14 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const redisClient = require("../db/redis");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const sendOTPEmail = require("../services/mailer")
 
 require("dotenv").config();
 
 const router = express.Router();
 
 // =======================
-// Nodemailer Transporter
-// =======================
-const transporter = nodemailer.createTransport({
-  service: "gmail", 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, 
-  },
-});
-
-// =======================
-// SIGNUP: collect data & send OTP via Email
+// SIGNUP: collect data & send OTP via EmailJS
 // =======================
 router.post("/signup", async (req, res) => {
   const { phone, name, email, password, role } = req.body;
@@ -32,8 +21,8 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    // Check if user already exists (by email or phone)
-    const existingUser = await User.findOne({email});
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
@@ -58,14 +47,14 @@ router.post("/signup", async (req, res) => {
       })
     );
 
-    // Send OTP via Emailgit 
-    await transporter.sendMail({
-      from: `"HireBuddy Auth" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your OTP Code - HireBuddy",
-      text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
-      html: `<p>Your OTP code is <b>${otp}</b>. It will expire in <b>10 minutes</b>.</p>`,
-    });
+    // =======================
+    // Send OTP via Mailjet
+    // =======================
+    const sent = await sendOTPEmail(email, otp);
+
+    if (!sent) {
+      return res.status(500).json({ error: "Failed to send OTP email" });
+    }
 
     return res.json({ message: "OTP sent successfully to your email" });
   } catch (error) {
@@ -73,6 +62,7 @@ router.post("/signup", async (req, res) => {
     return res.status(500).json({ error: "Failed to start signup" });
   }
 });
+
 
 // =======================
 // VERIFY OTP & CREATE USER
@@ -85,16 +75,15 @@ router.post("/verify-otp", async (req, res) => {
   }
 
   try {
-    // Retrieve signup data from Redis
     const signupDataStr = await redisClient.get(`signup:${phone}`);
     if (!signupDataStr) {
-      return res.status(400).json({ error: "No pending signup data found" });
+      return res.status(400).json({ error: "No pending signup data found or OTP expired" });
     }
 
     const signupData = JSON.parse(signupDataStr);
 
-    // Check OTP
-    if (signupData.otp !== otp) {
+    // 🔥 Fix type mismatch issue
+    if (signupData.otp.toString() !== otp.toString()) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
@@ -109,15 +98,13 @@ router.post("/verify-otp", async (req, res) => {
 
     await newUser.save();
 
-    // Delete temp signup data
+    // Delete temporary signup data
     await redisClient.del(`signup:${phone}`);
 
     return res.json({ message: "Signup successful", user: newUser });
   } catch (error) {
     console.error("Verify OTP error:", error);
-    return res
-      .status(500)
-      .json({ error: "OTP verification or user creation failed" });
+    return res.status(500).json({ error: "OTP verification or user creation failed" });
   }
 });
 
@@ -125,8 +112,7 @@ router.post("/verify-otp", async (req, res) => {
 // LOGIN (email OR phone)
 // =======================
 router.post("/login", async (req, res) => {
-  const { identifier, password } = req.body; 
-  // identifier can be email OR phone
+  const { identifier, password } = req.body;
 
   if (!identifier || !password) {
     return res
@@ -148,14 +134,12 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid email/phone or password" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email, phone: user.phone, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Send as cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -191,63 +175,5 @@ router.post("/logout", (req, res) => {
   });
   return res.status(200).json({ message: "Logout successful" });
 });
-
-module.exports = router;
-
-// Google OAuth
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    // Successful authentication
-    const token = jwt.sign(
-      { id: req.user._id, phone: req.user.phone, role: req.user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000,
-    });
-
-    res.redirect("/dashboard");
-  }
-);
-
-// Facebook OAuth
-router.get(
-  "/facebook",
-  passport.authenticate("facebook", { scope: ["email"] })
-);
-
-router.get(
-  "/facebook/callback",
-  passport.authenticate("facebook", { failureRedirect: "/login" }),
-  (req, res) => {
-    // Successful authentication
-    const token = jwt.sign(
-      { id: req.user._id, phone: req.user.phone, role: req.user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000,
-    });
-
-    res.redirect("/dashboard");
-  }
-);
 
 module.exports = router;
