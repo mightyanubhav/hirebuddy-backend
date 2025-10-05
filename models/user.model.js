@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  profileImage: {
+    url: { type: String, default: "" },
+    public_id: { type: String, default: "" },
+  },
   name: {
     type: String,
     required: true,
@@ -17,7 +21,7 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    match: /^\+?[1-9]\d{1,14}$/, 
+    match: /^\+?[1-9]\d{1,14}$/,
     // unique: true,
   },
 

@@ -5,6 +5,7 @@ const User = require("../models/user.model");
 const redisClient = require("../db/redis");
 const jwt = require("jsonwebtoken");
 const sendOTPEmail = require("../services/mailer")
+const authMiddleware = require("../middlewares/auth");
 
 require("dotenv").config();
 
@@ -167,7 +168,7 @@ router.post("/login", async (req, res) => {
 // =======================
 // LOGOUT
 // =======================
-router.post("/logout", (req, res) => {
+router.post("/logout", authMiddleware, (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
