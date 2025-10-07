@@ -1,0 +1,439 @@
+{
+  "app_name": "HireBuddy",
+  "tagline": "Your Trusted Local Companion - Anytime, Anywhere",
+  "description": "HireBuddy connects users with verified local buddies for personalized assistance services including travel companionship, apartment hunting, pickup/drop services, and daily task support.",
+  
+  "version": "2.1.0",
+  "release_date": "2024-12-01",
+  
+  "contact": {
+    "support_email": "support@hirebuddy.com",
+    "business_email": "hello@hirebuddy.com",
+    "customer_care": "1800-123-4567",
+    "whatsapp_support": "+91-9876543210",
+    "headquarters": "Bangalore, India"
+  },
+
+  "pricing_credits": {
+    "free_credits_on_signup": 3,
+    "credit_packs": [
+      {"credits": 5, "price": 500, "currency": "INR", "popular": true},
+      {"credits": 10, "price": 900, "currency": "INR", "saving": 100},
+      {"credits": 20, "price": 1600, "currency": "INR", "saving": 400},
+      {"credits": 50, "price": 3500, "currency": "INR", "saving": 1500}
+    ],
+    "credit_validity": "No expiry",
+    "refund_policy": "Instant credit refund on cancellation"
+  },
+
+  "services_categories": {
+    "travel_touring": {
+      "name": "Travel & Touring",
+      "services": [
+        "Local city guide",
+        "Tourist spot companion",
+        "Cultural experience buddy",
+        "Adventure travel partner",
+        "Photography tour guide"
+      ],
+      "average_cost": "2-3 credits/hour",
+      "popular_buddies": 450
+    },
+    
+    "accommodation": {
+      "name": "Accommodation Assistance",
+      "services": [
+        "Apartment hunting",
+        "PG/ hostel finding",
+        "Roommate matching",
+        "Property verification",
+        "Rental documentation help"
+      ],
+      "average_cost": "3-5 credits/service",
+      "popular_buddies": 320
+    },
+
+    "transport_assistance": {
+      "name": "Transport & Pickup",
+      "services": [
+        "Airport/station pickup",
+        "Local commute guide",
+        "Vehicle rental assistance",
+        "Route planning help",
+        "Drop services"
+      ],
+      "average_cost": "2-4 credits/trip",
+      "popular_buddies": 280
+    },
+
+    "daily_companion": {
+      "name": "Daily Companion",
+      "services": [
+        "Shopping buddy",
+        "Gym/fitness partner",
+        "Food exploration companion",
+        "Event/concert buddy",
+        "Chatting companion"
+      ],
+      "average_cost": "1-2 credits/hour",
+      "popular_buddies": 550
+    },
+
+    "professional_services": {
+      "name": "Professional Help",
+      "services": [
+        "Documentation assistance",
+        "Office setup help",
+        "Local formalities guide",
+        "Language translation",
+        "Emergency support"
+      ],
+      "average_cost": "3-6 credits/service",
+      "popular_buddies": 190
+    }
+  },
+
+  "user_features": {
+    "authentication": [
+      "Email OTP verification",
+      "Phone number verification",
+      "Social media signup (Google, Facebook)",
+      "Biometric login",
+      "Two-factor authentication"
+    ],
+
+    "booking_management": [
+      "Real-time buddy availability",
+      "Instant booking confirmation",
+      "Flexible scheduling",
+      "Recurring bookings",
+      "Booking reminders & notifications"
+    ],
+
+    "communication": [
+      "In-app real-time chat",
+      "Voice messaging",
+      "Image sharing",
+      "Video call integration",
+      "Translation support for 10+ languages"
+    ],
+
+    "payments_security": [
+      "Multiple payment options (UPI, Cards, Net Banking)",
+      "Secure escrow payment system",
+      "Payment fraud protection",
+      "Auto-refund on cancellation",
+      "Transparent pricing breakdown"
+    ],
+
+    "safety_features": [
+      "Live location sharing",
+      "Emergency SOS button",
+      "Trip tracking with trusted contacts",
+      "Real-time buddy verification status",
+      "24/7 safety support team"
+    ],
+
+    "personalization": [
+      "Smart buddy recommendations",
+      "Service preferences saving",
+      "Favorite buddies list",
+      "Booking history & receipts",
+      "Personalized service suggestions"
+    ]
+  },
+
+  "buddy_features": {
+    "onboarding": [
+      "6-step verification process",
+      "Profile setup assistance",
+      "Service portfolio creation",
+      "Training & orientation",
+      "Background check completion"
+    ],
+
+    "earning_management": [
+      "Flexible payout cycles (Daily/Weekly/Monthly)",
+      "Multiple bank account support",
+      "Earning analytics dashboard",
+      "Performance bonuses",
+      "Referral earnings program"
+    ],
+
+    "business_tools": [
+      "Smart calendar management",
+      "Automated booking accept/reject",
+      "Service area mapping",
+      "Price customization tools",
+      "Customer review management"
+    ],
+
+    "growth_opportunities": [
+      "Skill certification programs",
+      "Premium buddy status",
+      "Featured listing opportunities",
+      "Training workshops",
+      "Career progression path"
+    ],
+
+    "support": [
+      "Dedicated buddy support team",
+      "Legal & documentation help",
+      "Insurance coverage",
+      "Dispute resolution assistance",
+      "Community forums"
+    ]
+  },
+
+  "technical_features": {
+    "real_time": [
+      "WebSocket based live chat",
+      "Online/offline status tracking",
+      "Live location sharing",
+      "Instant notifications",
+      "Real-time booking updates"
+    ],
+
+    "matching_algorithm": [
+      "Location-based buddy matching",
+      "Skill & service matching",
+      "Rating & review based ranking",
+      "Availability based suggestions",
+      "Language preference matching"
+    ],
+
+    "analytics": [
+      "User behavior tracking",
+      "Service demand forecasting",
+      "Buddy performance metrics",
+      "Revenue analytics dashboard",
+      "Customer satisfaction scores"
+    ],
+
+    "admin_features": [
+      "Comprehensive admin dashboard",
+      "User & buddy management",
+      "Revenue & payout management",
+      "Dispute resolution system",
+      "Platform analytics & reports"
+    ]
+  },
+
+  "verification_process": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Profile Verification",
+        "description": "Government ID and personal information validation",
+        "duration": "2-4 hours",
+        "documents": ["Aadhaar Card", "PAN Card", "Driving License"]
+      },
+      {
+        "step": 2,
+        "name": "Background Check",
+        "description": "7-year criminal record and police verification",
+        "duration": "24-48 hours",
+        "documents": ["Address Proof", "Police Verification Certificate"]
+      },
+      {
+        "step": 3,
+        "name": "Document Authentication",
+        "description": "Address proof and professional certificates verification",
+        "duration": "4-6 hours",
+        "documents": ["Utility Bills", "Educational Certificates", "Skill Certifications"]
+      },
+      {
+        "step": 4,
+        "name": "Skill Assessment",
+        "description": "Practical evaluation and capability testing",
+        "duration": "1-2 hours",
+        "process": ["Video Interview", "Skill Test", "Scenario Assessment"]
+      },
+      {
+        "step": 5,
+        "name": "Training & Orientation",
+        "description": "Platform and service standards training",
+        "duration": "3-4 hours",
+        "topics": ["Platform Usage", "Service Standards", "Safety Protocols", "Customer Service"]
+      },
+      {
+        "step": 6,
+        "name": "Final Approval",
+        "description": "Quality assurance and platform activation",
+        "duration": "2-3 hours",
+        "final_steps": ["Profile Activation", "Service Area Setup", "Availability Setting"]
+      }
+    ],
+    "success_rate": "92%",
+    "average_completion_time": "2-3 days"
+  },
+
+  "safety_measures": {
+    "verification": [
+      "6-step comprehensive verification",
+      "Regular re-verification every 6 months",
+      "Police background checks",
+      "Document authenticity validation",
+      "Reference checks for premium services"
+    ],
+
+    "monitoring": [
+      "24/7 safety monitoring team",
+      "Real-time service tracking",
+      "AI-based anomaly detection",
+      "Regular buddy performance reviews",
+      "Customer feedback analysis"
+    ],
+
+    "emergency": [
+      "In-app emergency SOS button",
+      "Automatic location sharing with emergency contacts",
+      "Direct connection to local authorities",
+      "Instant support team response",
+      "Emergency ride assistance"
+    ],
+
+    "insurance": [
+      "Third-party liability insurance",
+      "Accident coverage for buddies",
+      "Theft protection",
+      "Service guarantee insurance",
+      "Customer satisfaction guarantee"
+    ]
+  },
+
+  "company_info": {
+    "mission": "To empower individuals with trusted local assistance while creating meaningful earning opportunities for service providers.",
+    "vision": "Building the world's most trusted hyperlocal assistance platform that connects people and creates communities.",
+    
+    "values": [
+      {
+        "icon": "🎯",
+        "name": "Customer First",
+        "description": "We prioritize our customers' needs in every decision we make"
+      },
+      {
+        "icon": "🚀",
+        "description": "Constantly pushing boundaries to deliver cutting-edge solutions"
+      },
+      {
+        "icon": "🤝",
+        "name": "Integrity",
+        "description": "We believe in transparency and doing the right thing always"
+      },
+      {
+        "icon": "🌍",
+        "name": "Impact",
+        "description": "Committed to making a positive difference in our community"
+      },
+      {
+        "icon": "🛡️",
+        "name": "Safety",
+        "description": "Uncompromising commitment to user safety and security"
+      }
+    ],
+
+    "achievements": [
+      "50,000+ verified buddies",
+      "200,000+ satisfied customers",
+      "4.8/5 average rating",
+      "Operating in 15+ cities",
+      "98% customer satisfaction rate"
+    ],
+
+    "partners": [
+      "Local tourism departments",
+      "Real estate associations",
+      "Transport authorities",
+      "Payment gateway providers",
+      "Insurance partners"
+    ]
+  },
+
+  "faqs": {
+    "general": [
+      {
+        "q": "What is HireBuddy?",
+        "a": "HireBuddy is a platform that connects you with verified local buddies for various assistance services including travel companionship, apartment hunting, pickup/drop services, and daily task support."
+      },
+      {
+        "q": "How does HireBuddy work?",
+        "a": "Download the app, sign up, get 3 free credits, browse verified buddies, book services using credits, and get real-time assistance from trusted local experts."
+      },
+      {
+        "q": "Is HireBuddy available in my city?",
+        "a": "We're currently operating in 15+ major Indian cities including Bangalore, Delhi, Mumbai, Hyderabad, Chennai, Pune, and Kolkata with continuous expansion."
+      }
+    ],
+
+    "booking_payments": [
+      {
+        "q": "How much does it cost to use HireBuddy?",
+        "a": "Get started with 3 free credits! After that, purchase credit packs starting at ₹500 for 5 credits. Each service costs credits based on duration and type."
+      },
+      {
+        "q": "What payment methods do you accept?",
+        "a": "We accept UPI, Credit/Debit Cards, Net Banking, Digital Wallets, and other popular payment methods in India."
+      },
+      {
+        "q": "Can I cancel my booking?",
+        "a": "Yes! Free cancellation up to 24 hours before service with instant credit refund. Late cancellations may have minimal charges."
+      }
+    ],
+
+    "safety_verification": [
+      {
+        "q": "How do you verify buddies?",
+        "a": "We have a rigorous 6-step verification process including ID verification, background checks, skill assessment, training, and final approval ensuring only trusted buddies serve you."
+      },
+      {
+        "q": "Is my personal information safe?",
+        "a": "Absolutely! We use bank-level encryption, comply with data protection laws, and never share your personal information without consent."
+      },
+      {
+        "q": "What if I face any issues during service?",
+        "a": "We provide 24/7 customer support, in-app emergency SOS button, live tracking, and instant support team assistance for any issues."
+      }
+    ],
+
+    "buddy_related": [
+      {
+        "q": "How do I become a Buddy?",
+        "a": "Download the Buddy app, complete the 6-step verification process, set up your profile, define your services and pricing, and start accepting bookings to earn money."
+      },
+      {
+        "q": "How much can I earn as a Buddy?",
+        "a": "Buddies typically earn ₹500-₹5000 per service based on expertise and service type. Top buddies earn ₹50,000+ monthly with flexible working hours."
+      },
+      {
+        "q": "When do buddies get paid?",
+        "a": "Choose from daily, weekly, or monthly payout cycles. Payments are securely transferred to your bank account with detailed earning statements."
+      }
+    ],
+
+    "technical": [
+      {
+        "q": "What technology does HireBuddy use?",
+        "a": "We use React Native for mobile apps, Node.js backend, WebSockets for real-time features, AWS for cloud infrastructure, and advanced AI for matching algorithms."
+      },
+      {
+        "q": "How does real-time chat work?",
+        "a": "We use WebSocket technology for instant messaging, showing online/offline status, and delivering real-time notifications for seamless communication."
+      },
+      {
+        "q": "Is there a web version?",
+        "a": "Currently we're mobile-first with iOS and Android apps. Web version is coming soon with all features available on desktop."
+      }
+    ]
+  },
+
+  "platform_stats": {
+    "total users": 200,
+    "active_buddies": 50,
+    "cities_served": 15,
+    "services_completed": 350000,
+    "average_rating": 4.8,
+    "response_time": "Under 4 minutes",
+    "booking_success_rate": "99.2%"
+  }
+}

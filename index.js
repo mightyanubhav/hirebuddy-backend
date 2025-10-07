@@ -5,6 +5,9 @@ const express = require("express");
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
 
+const chatbotRoute = require("./routes/chatbotRoute");
+
+
 const connectDB = require('./db/db');
 const userRoutes = require('./routes/userRoutes'); 
 const buddyRoutes = require('./routes/buddyRoutes');
@@ -34,6 +37,12 @@ app.get("/wakeup", (req, res) => {
   res.status(200).json({ message: "Server is awake 🚀" });
 });
 
+app.use("/chatbot", chatbotRoute);
+
+
+
+
+
 app.use('/user', userRoutes);
 app.use('/buddy', buddyRoutes);
 app.use('/customer', customerRoutes);
@@ -56,3 +65,4 @@ async function main() {
 }
 
 main();
+

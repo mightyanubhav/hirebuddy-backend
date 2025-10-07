@@ -23,6 +23,9 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "@google/genai": "^1.22.0",
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.11.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.7.0",
