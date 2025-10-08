@@ -9,6 +9,90 @@ const Message = require("../models/message.model");
 
 const { customerOnly } = require("../middlewares/roles");
 
+const { cloudinary, upload,streamUpload, parseToArray } = require('../services/editProfilesCloudinary');
+
+
+// 🧍‍♂️ Get logged-in user's profile
+router.get("/me", authMiddleware, customerOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ user });
+  } catch (err) {
+    console.error("Error fetching user profile:", err);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+
+router.put(
+  "/profileEdit",
+  authMiddleware,
+  customerOnly,
+  upload.single("profileImage"),
+  async (req, res) => {
+    try {
+      const { name, location, languages, bio } = req.body;
+
+      const updateFields = {
+        name, // ✅ update name at root
+        customerProfile: {
+          location,
+          languages: parseToArray(languages),
+          bio,
+        },
+      };
+
+      const user = await User.findById(req.user.id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      // handle image upload
+      if (req.file) {
+        const result = await streamUpload(req.file.buffer, {
+          folder: "hirebuddy_profiles",
+          resource_type: "image",
+          transformation: [{ width: 800, height: 800, crop: "limit" }],
+        });
+
+        if (user.profileImage?.public_id) {
+          try {
+            await cloudinary.uploader.destroy(user.profileImage.public_id, {
+              resource_type: "image",
+            });
+          } catch (err) {
+            console.warn("Could not delete old image:", err.message || err);
+          }
+        }
+
+        updateFields.profileImage = {
+          url: result.secure_url,
+          public_id: result.public_id,
+        };
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.id,
+        { $set: updateFields },
+        { new: true }
+      ).select("-password -buddyProfile");
+
+      res.json({
+        message: "Customer profile updated successfully",
+        customer: updatedUser,
+      });
+    } catch (err) {
+      console.error("Update error:", err);
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: err.message });
+      }
+      res.status(500).json({ error: "Could not update profile" });
+    }
+  }
+);
+
+
 // 1. View All Buddies (Filtered List)
 router.get("/buddies", authMiddleware, customerOnly, async (req, res) => {
   const { location, expertise, date } = req.query;
@@ -124,18 +208,6 @@ router.get("/bookings", authMiddleware, customerOnly, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch bookings" });
   }
 });
-
-router.get("/me", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
-  } catch (err) {
-    console.error("Error fetching profile:", err);
-    res.status(500).json({ error: "Failed to fetch profile" });
-  }
-});
-
 
 // GET /messages?bookingId=123
 router.get("/messages", authMiddleware, async (req, res) => {
