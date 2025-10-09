@@ -19,9 +19,12 @@ const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
 
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // React dev server URL
-  credentials: true
+  origin: process.env.FRONTEND_URL, 
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+  credentials: true 
 }));
 
 
